@@ -18,7 +18,6 @@ import {
   Award,
 } from "lucide-react";
 import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 const DonesApp = () => {
   const [currentStep, setCurrentStep] = useState("welcome");
@@ -827,29 +826,23 @@ const DonesApp = () => {
         throw new Error("No se pudo encontrar el certificado");
       }
 
-      // Capturar el certificado como imagen de alta calidad
+      // Capturar el certificado como imagen de alta calidad para WhatsApp
       const canvas = await html2canvas(elemento, {
-        scale: 3,
+        scale: 2,
         backgroundColor: "#ffffff",
         logging: false,
         useCORS: true,
         allowTaint: true,
-        width: 1200,
-        height: 850,
       });
 
-      // Crear PDF en formato landscape
-      const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "px",
-        format: [1200, 850],
-      });
-
+      // Convertir a imagen PNG
       const imgData = canvas.toDataURL("image/png", 1.0);
-      pdf.addImage(imgData, "PNG", 0, 0, 1200, 850);
 
-      // Descargar el PDF
-      pdf.save(`Certificado_Dones_${userName.replace(/\s+/g, "_")}.pdf`);
+      // Crear un enlace temporal para descargar la imagen
+      const link = document.createElement("a");
+      link.download = `Mis_Dones_Espirituales_${userName.replace(/\s+/g, "_")}.png`;
+      link.href = imgData;
+      link.click();
 
       // Otorgar badge
       otorgarBadge("certificado");
@@ -858,11 +851,11 @@ const DonesApp = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setCurrentStep(originalStep);
 
-      alert("✅ ¡Certificado descargado exitosamente!");
+      alert("✅ ¡Imagen descargada! Ahora puedes compartirla en WhatsApp 📲");
     } catch (error) {
       console.error("Error al generar certificado:", error);
       alert(
-        "❌ Hubo un error al generar el certificado. Por favor, intenta de nuevo."
+        "❌ Hubo un error al generar la imagen. Por favor, intenta de nuevo."
       );
       setCurrentStep("results");
     }
@@ -1645,7 +1638,7 @@ if (currentStep === "results") {
             className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
           >
             <Download className="w-5 h-5" />
-            Descargar Certificado
+            Descargar Imagen
           </button>
 
           <button
@@ -1676,91 +1669,90 @@ if (currentStep === "results") {
   );
 }
 
-// CERTIFICADO (oculto, solo para generar PDF)
+// CERTIFICADO (oculto, solo para generar imagen)
 if (currentStep === "certificado") {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-4">
       <div
         ref={certificadoRef}
-        className="w-[1200px] h-[850px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-8 border-purple-600 rounded-3xl shadow-2xl p-16 relative overflow-hidden"
+        className="w-[1080px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-8 border-purple-600 rounded-2xl shadow-2xl p-8 relative overflow-hidden"
         style={{ fontFamily: "Arial, sans-serif" }}
       >
         {/* Decoraciones de fondo */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-purple-200 rounded-full opacity-20 -translate-x-32 -translate-y-32"></div>
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-200 rounded-full opacity-20 translate-x-32 translate-y-32"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-200 rounded-full opacity-10"></div>
+        <div className="absolute top-0 left-0 w-48 h-48 bg-purple-200 rounded-full opacity-20 -translate-x-24 -translate-y-24"></div>
+        <div className="absolute bottom-0 right-0 w-48 h-48 bg-blue-200 rounded-full opacity-20 translate-x-24 translate-y-24"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-200 rounded-full opacity-10"></div>
 
         {/* Contenido del certificado */}
-        <div className="relative z-10 text-center h-full flex flex-col justify-between">
+        <div className="relative z-10 text-center">
           {/* Header */}
-          <div>
-            <div className="flex justify-center mb-6">
-              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-24 h-24 rounded-full flex items-center justify-center">
-                <Award className="w-16 h-16 text-white" />
+          <div className="mb-6">
+            <div className="flex justify-center mb-4">
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-20 h-20 rounded-full flex items-center justify-center">
+                <Award className="w-12 h-12 text-white" />
               </div>
             </div>
-            <h1 className="text-6xl font-bold text-gray-800 mb-4">
-              Certificado de Dones Espirituales
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              Mis Dones Espirituales
             </h1>
-            <div className="w-32 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto mb-8"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto mb-4"></div>
           </div>
 
-          {/* Cuerpo */}
-          <div className="flex-1 flex flex-col justify-center">
-            <p className="text-2xl text-gray-600 mb-6">Se certifica que</p>
-            <h2 className="text-5xl font-bold text-purple-700 mb-6 border-b-4 border-purple-300 pb-4 inline-block mx-auto px-12">
+          {/* Nombre */}
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-purple-700 mb-2 border-b-4 border-purple-300 pb-2 inline-block px-8">
               {userName}
             </h2>
-            <p className="text-2xl text-gray-600 mb-4">
-              Ha completado la ruta de descubrimiento de dones espirituales
+            <p className="text-lg text-gray-600 mt-3">
+              🎯 {puntos} puntos • 🏆 {badges.length} insignias
             </p>
-            <p className="text-xl text-gray-500 mb-8">
-              Obteniendo {puntos} puntos y {badges.length} insignias
-            </p>
+          </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-xl mb-8 mx-auto max-w-3xl">
-              <h3 className="text-3xl font-bold text-gray-800 mb-6">
-                Sus Dones Principales:
-              </h3>
-              <div className="space-y-4">
-                {results.map((don, index) => {
-                  const Icon = don.icon;
-                  return (
-                    <div
-                      key={don.id}
-                      className="flex items-center gap-4 justify-start"
-                    >
-                      <div className={`${don.color} rounded-xl p-3`}>
-                        <Icon
-                          className="w-8 h-8 text-white"
-                          strokeWidth={2.5}
-                        />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-2xl font-bold text-gray-800">
-                          {index + 1}. {don.nombre}
-                        </p>
-                        <p className="text-lg text-gray-600">{don.versiculo}</p>
-                      </div>
+          {/* Dones Principales */}
+          <div className="bg-white rounded-xl p-6 shadow-xl mb-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Mis 3 Dones Principales:
+            </h3>
+            <div className="space-y-3">
+              {results.map((don, index) => {
+                const Icon = don.icon;
+                return (
+                  <div
+                    key={don.id}
+                    className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl"
+                  >
+                    <div className={`${don.color} rounded-lg p-2`}>
+                      <Icon
+                        className="w-7 h-7 text-white"
+                        strokeWidth={2.5}
+                      />
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="text-left flex-1">
+                      <p className="text-xl font-bold text-gray-800">
+                        {index + 1}. {don.nombre}
+                      </p>
+                      <p className="text-sm text-gray-600">{don.versiculo}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Versículo */}
+          <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-4 mb-4">
+            <div className="flex justify-center gap-2 items-center">
+              <Sparkles className="w-5 h-5 text-yellow-500" />
+              <p className="text-base text-gray-700 italic font-medium">
+                "Cada uno según el don que ha recibido, minístrelo a los otros" - 1 Pedro 4:10
+              </p>
+              <Sparkles className="w-5 h-5 text-yellow-500" />
             </div>
           </div>
 
           {/* Footer */}
-          <div>
-            <div className="flex justify-center gap-4 items-center mb-6">
-              <Sparkles className="w-8 h-8 text-yellow-500" />
-              <p className="text-xl text-gray-600 italic">
-                "Cada uno según el don que ha recibido, minístrelo a los otros"
-                - 1 Pedro 4:10
-              </p>
-              <Sparkles className="w-8 h-8 text-yellow-500" />
-            </div>
-            <p className="text-lg text-gray-500">
-              Fecha:{" "}
+          <div className="text-center">
+            <p className="text-sm text-gray-500">
               {new Date().toLocaleDateString("es-ES", {
                 year: "numeric",
                 month: "long",
