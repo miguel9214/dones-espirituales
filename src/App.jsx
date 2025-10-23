@@ -30,6 +30,7 @@ const DonesApp = () => {
   const [puntos, setPuntos] = useState(0);
   const [badges, setBadges] = useState([]);
   const [mostrarBadge, setMostrarBadge] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const todosLosBadges = [
     {
@@ -758,7 +759,11 @@ const DonesApp = () => {
     setCurrentStep("results");
   };
 
-  const handleAnswerTest = (preguntaId, opcion) => {
+  const handleAnswerTest = (preguntaId, opcion, opcionIndex) => {
+    // Marcar visualmente la opción seleccionada
+    setSelectedOption(opcionIndex);
+
+    // Guardar la respuesta
     setAnswers({ ...answers, [preguntaId]: opcion });
 
     // Badge por llegar a la mitad
@@ -766,14 +771,20 @@ const DonesApp = () => {
       otorgarBadge("mitad_test");
     }
 
-    const siguientePregunta =
-      preguntasTest.findIndex((p) => p.id === preguntaId) + 1;
-    if (siguientePregunta < preguntasTest.length) {
-      setCurrentStep(`test-${siguientePregunta + 1}`);
-    } else {
-      calcularResultadosTest();
-      otorgarBadge("test_completo");
-    }
+    // Esperar un momento para que se vea la selección antes de cambiar de pregunta
+    setTimeout(() => {
+      const siguientePregunta =
+        preguntasTest.findIndex((p) => p.id === preguntaId) + 1;
+      if (siguientePregunta < preguntasTest.length) {
+        setCurrentStep(`test-${siguientePregunta + 1}`);
+        // Resetear la selección visual para la siguiente pregunta
+        setSelectedOption(null);
+      } else {
+        calcularResultadosTest();
+        otorgarBadge("test_completo");
+        setSelectedOption(null);
+      }
+    }, 300); // 300ms para dar feedback visual
   };
 
   const compartirResultados = () => {
@@ -1378,22 +1389,41 @@ if (currentStep.startsWith("test-")) {
         </h2>
 
         <div className="space-y-3">
-          {pregunta.opciones.map((opcion, index) => (
-            <button
-              key={index}
-              onClick={() => handleAnswerTest(pregunta.id, opcion)}
-              className="w-full text-left p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 hover:scale-102 group"
-            >
-              <div className="flex items-start gap-3">
-                <div className="bg-gray-100 group-hover:bg-indigo-500 text-gray-600 group-hover:text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold transition-colors">
-                  {String.fromCharCode(65 + index)}
+          {pregunta.opciones.map((opcion, index) => {
+            const isSelected = selectedOption === index;
+            return (
+              <button
+                key={index}
+                onClick={() => handleAnswerTest(pregunta.id, opcion, index)}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 hover:scale-102 group ${
+                  isSelected
+                    ? "border-indigo-500 bg-indigo-100 scale-102"
+                    : "border-gray-200 hover:border-indigo-500 hover:bg-indigo-50"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold transition-colors ${
+                      isSelected
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-100 group-hover:bg-indigo-500 text-gray-600 group-hover:text-white"
+                    }`}
+                  >
+                    {String.fromCharCode(65 + index)}
+                  </div>
+                  <span
+                    className={`font-semibold pt-1 ${
+                      isSelected
+                        ? "text-indigo-700"
+                        : "text-gray-700 group-hover:text-indigo-700"
+                    }`}
+                  >
+                    {opcion.texto}
+                  </span>
                 </div>
-                <span className="font-semibold text-gray-700 group-hover:text-indigo-700 pt-1">
-                  {opcion.texto}
-                </span>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
